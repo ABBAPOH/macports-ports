@@ -1,11 +1,12 @@
 # -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
 
 PortSystem          1.0
-PortGroup           qmake5 1.0
+PortGroup           qt5 1.0
+PortGroup           cmake 1.1
 PortGroup           compiler_blacklist_versions 1.0
 
 name                qbs
-version             1.19.2
+version             1.20.0
 revision            0
 
 categories          devel
@@ -18,11 +19,12 @@ long_description    ${name} is {*}${description}
 
 homepage            https://wiki.qt.io/Qbs
 distname            qbs-src-${version}
-master_sites        https://download.qt.io/official_releases/qbs/${version}/
+master_sites        https://download.qt.io/official_releases/qbs/${version}/ \
+                    file:///Users/abbapoh/Downloads/
 
-checksums           rmd160  f0c3a2447806c050a430d5c6a4bf02ef9655537f \
-                    sha256  91fd5ca08f170e8178dd5183579f03e56965648770b7e7a09258550aee53950f \
-                    size    4961194
+checksums           rmd160  dc91d0c438db689c54487a6243ce69751b44f15f \
+                    sha256  31710d8d6171f66931e24496c0199b94c55233fa29fc8920bfabf96f44cc3789 \
+                    size    4978139
 
 qt5.depends_component qtscript
 qt5.min_version     5.14.0
@@ -32,18 +34,20 @@ compiler.cxx_standard 2017
 # https://github.com/macports/macports-base/pull/179
 compiler.blacklist-append {clang < 1001}
 
-configure.post_args QBS_INSTALL_PREFIX=${prefix} \
-                    CONFIG+=qbs_disable_rpath \
-                    CONFIG+=qbs_enable_project_file_updates \
-                    qbs.pro
+configure.args-append -DQBS_ENABLE_RPATH=NO
+#configure.post_args QBS_INSTALL_PREFIX=${prefix} \
+#                    CONFIG+=qbs_disable_rpath \
+#                    CONFIG+=qbs_enable_project_file_updates \
+#                    qbs.pro
 
-# set DYLD_LIBRARY_PATH to avoid
-#    dyld: Library not loaded: ${prefix}/lib/libqbscore.1.dylib
-#      Referenced from: ${worksrcpath}/bin/qbs
-#      Reason: image not found
+cmake.build_type    Release
+cmake.generator     Ninja
+
 # set TMPDIR to avoid
 #    SOFT ASSERT: job->state() == AbstractJob::StateRunning in api/project.cpp:153
-patchfiles-append patch-environment.diff
+build.env-append     TMPDIR=/tmp
+#configure.env-append TMPDIR=/tmp
+destroot.env-append  TMPDIR=/tmp
 
 livecheck.type      regex
 livecheck.url       https://download.qt.io/official_releases/qbs/
